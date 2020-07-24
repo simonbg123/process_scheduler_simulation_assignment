@@ -1,22 +1,168 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Scanner;
 
 public class Simulation {
 
     public static final String IDLE = "___";
     static int n_cpus;
-    static void print_results(ArrayList<SimProcess> process_list, SimulationResult results) {
+    static ArrayList<String> input_lines = new ArrayList<>();
+    static void print_results(SimulationResult results) {
+
+        // print the timeline
+        StringBuilder sb = new StringBuilder();
+        sb.append("\ntime              |");
+        int n_time_units = results.cpu_timelines.get(0).size();
+        for (int i = 0; i < n_time_units; ++i) {
+            sb.append(String.format("%03d", i) + "|");
+        }
+        sb.append("\n");
+        for (int i = 0; i < (19 + n_time_units*4); ++i) sb.append("-");
+        sb.append('\n');
+        for (int i = 0; i < results.cpu_timelines.size(); ++i) {
+            sb.append("CPU" + String.format("%03d", i) + "             ");
+            var cpu_timeline = results.cpu_timelines.get(i);
+            for (String str : cpu_timeline) {
+                sb.append(str + (str.length() == 2? "  ": " "));
+            }
+            sb.append('\n');
+        }
+        sb.append('\n');
+
+        // check the max length of all ready-queue states
+        int max_length = 0;
+        for (ArrayList<String> queue : results.readyqueue_timeline) {
+            if (queue.size() > max_length) {
+                max_length = queue.size();
+            }
+        }
+        // print the ready-queue, level by level
+        sb.append("Ready-queue        ");
+        for (int i = 0; i < max_length; ++i) {
+            for (var queue_state : results.readyqueue_timeline) {
+                if (queue_state.size() > i) {
+                    String s = queue_state.get(i);
+                    sb.append(s + (s.length() == 2? "  ": " "));
+                }
+                else sb.append("    ");
+            }
+            sb.append("\n                   ");
+        }
+        sb.append("\n");
+
+        //print the IO processing queue
+        sb.append("IO processing      ");
+        for (String s : results.IO_timeline) {
+            sb.append(s + (s.length() == 2? "  ": " "));
+        }
+        sb.append("\n\n");
+
+        // check the max length of all IO wait-queue states
+        max_length = 0;
+        for (ArrayList<String> queue : results.IO_waitqueue_timeline) {
+            if (queue.size() > max_length) {
+                max_length = queue.size();
+            }
+        }
+        //print the IO wait queue
+
+        sb.append("IO wait queue      ");
+        for (int i = 0; i < max_length; ++i) {
+            for (var queue_state : results.IO_waitqueue_timeline) {
+                if (queue_state.size() > i) {
+                    String s = queue_state.get(i);
+                    sb.append(s + (s.length() == 2? "  ": " "));
+                }
+                else sb.append("    ");
+            }
+            sb.append("\n                   ");
+        }
+        sb.append("\n");
+
+
+        System.out.println(sb.toString());
 
     }
-    static void read_input(String file_path) {
+    static void init(String file_path) {
+        try (BufferedReader br = new BufferedReader(new FileReader(file_path))) {
+            boolean found_n_cpus = false;
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                line = line.trim();
+                if (line.isEmpty() || line.startsWith("//")) continue;
+                else if (!found_n_cpus){
+                    n_cpus = Integer.parseInt(line.split("[ \t$]+")[1]);
+                    found_n_cpus = true;
+                }
+                else {
+                    input_lines.add(line);
+                }
+            }
+        }
+        catch (IOException ioe) {
+            System.out.println("Couldn't open file: " + file_path);
+            ioe.printStackTrace();
+            System.exit(1);
+        }
+        catch (Exception e) {
+            System.out.println("Problem with input format");
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
 
+    static ArrayList<SimProcess> build_process_list() {
+        ArrayList<SimProcess> process_list = new ArrayList<>();
+        for (String entry_line : input_lines) {
+            String[] fields = entry_line.split("[ \t$]+");
+            LinkedList<Integer> io_requests = new LinkedList<>();
+            if (fields.length > 3) { // there are IO requests
+                for (int i = 3; i < fields.length; ++i) {
+                    io_requests.add(Integer.parseInt(fields[i]));
+                }
+            }
+
+            process_list.add(
+                    new SimProcess(
+                            fields[0],
+                            Integer.parseInt(fields[1]),
+                            Integer.parseInt((fields[2])),
+                            io_requests)
+            );
+
+        }
+
+        return process_list;
     }
 
     public static void main(String[] args) {
-        //main loop create a brand new list of processes for each algo
+        Scanner scan = new Scanner(System.in);
+        String file_path;
+        if (args.length == 1) file_path = args[0];
+        else {
+            while (true) {
+                System.out.println("Please provide a valid input file path: ");
+                file_path = scan.nextLine().trim();
+                if (new File(file_path).canRead()) break;
+            }
+        }
+
+        // read input
+        init(file_path);
+
+        //main loop creates a brand new list of processes for each algo
+        FCFS fcfs = new FCFS();
+        SimulationResult sim_result = fcfs.run_processes(build_process_list());
+        print_results(sim_result);
+
+
 
         // iterator test
-        ArrayList<String> l = new ArrayList<>();
+        /*ArrayList<String> l = new ArrayList<>();
         l.add("hello1");
         l.add("hello2");
 
@@ -29,6 +175,12 @@ public class Simulation {
         }
         System.out.println("done");
         System.out.println(l);
+        System.out.println("\n".length() == 0);
+
+        ArrayList<Integer> l2 = new ArrayList<>();
+        for (int i : l2) {
+            System.out.println("problem");
+        }*/
     }
 
 
