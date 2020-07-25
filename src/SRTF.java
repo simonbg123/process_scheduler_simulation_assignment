@@ -23,6 +23,7 @@ public class SRTF implements SchedulingAlgorithm {
     }
     @Override
     public SimulationResult run_processes(ArrayList<SimProcess> process_list) {
+
         outerloop:
         while (!process_list.isEmpty()) {
 
@@ -49,6 +50,7 @@ public class SRTF implements SchedulingAlgorithm {
 
             // Poll all CPUs, check availability, then status of current process
             // check if process finished or needs IO
+            // check if processes can be bumped
             for (CPU cpu : cpu_list) {
                 // check if CPU is currently free at the beginning of this cycle
                 SimProcess p = cpu.currentProcess;

@@ -11,7 +11,7 @@ import java.util.Scanner;
 
 public class Simulation {
 
-    public static final String IDLE = "___";
+    static final String IDLE = "___";
     static int n_cpus;
     static int quantum;
     static ArrayList<String> input_lines = new ArrayList<>();
@@ -106,6 +106,10 @@ public class Simulation {
 
         System.out.println("\n\n**** SRTF ****\n");
         sim_result = new SRTF().run_processes(build_process_list());
+        print_results(sim_result);
+
+        System.out.println("\n\n**** RR with quantum: " + quantum +" ****\n");
+        sim_result = new RR().run_processes(build_process_list());
         print_results(sim_result);
 
 
