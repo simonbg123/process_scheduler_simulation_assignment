@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class FCFS implements SchedulingAlgorithm {
+public class SRTF implements SchedulingAlgorithm {
 
     Queue<SimProcess> ready_queue;
     ArrayList<ArrayList<String>> ready_queue_timeline;
@@ -9,8 +9,8 @@ public class FCFS implements SchedulingAlgorithm {
     CPU[] cpu_list;
     int time;
 
-    public FCFS() {
-        ready_queue = new LinkedList<>();
+    public SRTF() {
+        ready_queue = new PriorityQueue<>((SimProcess s1, SimProcess s2)->(s1.time_rem - s2.time_rem));
         ready_queue_timeline = new ArrayList<>();
         io_queue = new IOqueue();
         sim_result = new SimulationResult();
@@ -21,10 +21,8 @@ public class FCFS implements SchedulingAlgorithm {
             cpu_list[i] = new CPU();
         }
     }
-
     @Override
     public SimulationResult run_processes(ArrayList<SimProcess> process_list) {
-
         outerloop:
         while (!process_list.isEmpty()) {
 
@@ -74,6 +72,23 @@ public class FCFS implements SchedulingAlgorithm {
                     io_queue.wait_queue.add(p); // may still be moved to io processing during this cycle
                     cpu.currentProcess = null;
                     give_process_to_cpu(cpu);
+                }
+                else { // active process, check if can be bumped
+                    int time_rem = p.time_rem;
+
+                    var ite = ready_queue.iterator();
+
+                    while (ite != null && ite.hasNext()) {
+                        var pr = ite.next();
+                        if (pr.time_rem >= time_rem) break; // the queue doesn't have shorter remaining times
+                        else { // there is a shorter remaining time, need to bump
+                            cpu.currentProcess = pr;
+                            ite.remove();
+                            ite = null;
+                            ready_queue.add(p); // p goes back to the queue
+                        }
+                    }
+
                 }
                 // else, it is an active process. Will update at end of this iteration
             }

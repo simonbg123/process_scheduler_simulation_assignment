@@ -2,6 +2,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -11,7 +13,125 @@ public class Simulation {
 
     public static final String IDLE = "___";
     static int n_cpus;
+    static int quantum;
     static ArrayList<String> input_lines = new ArrayList<>();
+
+    static void init(String file_path) {
+        try (BufferedReader br = new BufferedReader(new FileReader(file_path))) {
+            boolean found_n_cpus = false;
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                line = line.trim();
+                if (line.isEmpty() || line.startsWith("//")) continue;
+                else if (!found_n_cpus){
+                    n_cpus = Integer.parseInt(line.split("[ \t$]+")[1]);
+                    found_n_cpus = true;
+                }
+                else {
+                    input_lines.add(line);
+                }
+            }
+        }
+        catch (IOException ioe) {
+            System.out.println("Couldn't open file: " + file_path);
+            ioe.printStackTrace();
+            System.exit(1);
+        }
+        catch (Exception e) {
+            System.out.println("Problem with input format");
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+
+    static ArrayList<SimProcess> build_process_list() {
+        ArrayList<SimProcess> process_list = new ArrayList<>();
+        for (String entry_line : input_lines) {
+            String[] fields = entry_line.split("[ \t$]+");
+            LinkedList<Integer> io_requests = new LinkedList<>();
+            if (fields.length > 3) { // there are IO requests
+                for (int i = 3; i < fields.length; ++i) {
+                    io_requests.add(Integer.parseInt(fields[i]));
+                }
+            }
+
+            process_list.add(
+                    new SimProcess(
+                            fields[0],
+                            Integer.parseInt(fields[1]),
+                            Integer.parseInt((fields[2])),
+                            io_requests)
+            );
+
+        }
+
+        return process_list;
+    }
+
+    public static void main(String[] args) {
+
+        Scanner scan = new Scanner(System.in);
+        String file_path;
+        if (args.length == 1) file_path = args[0];
+        else {
+            while (true) {
+                System.out.println("Please provide a valid input file path: ");
+                file_path = scan.nextLine().trim();
+                if (new File(file_path).canRead()) break;
+            }
+        }
+        while(quantum == 0) {
+            try {
+                System.out.println("Please provide quantum");
+                quantum = scan.nextInt();
+            }
+            catch (Exception e) {
+                System.out.println("Problem reading quantum value.");
+                scan.nextLine();
+            }
+        }
+
+
+
+        // read input
+        init(file_path);
+
+        //main loop creates a brand new list of processes for each algo
+        System.out.println("**** FCFS ****\n");
+        SimulationResult sim_result = new FCFS().run_processes(build_process_list());
+        print_results(sim_result);
+
+        System.out.println("\n\n**** SJF ****\n");
+        sim_result = new SJF().run_processes(build_process_list());
+        print_results(sim_result);
+
+        System.out.println("\n\n**** SRTF ****\n");
+        sim_result = new SRTF().run_processes(build_process_list());
+        print_results(sim_result);
+
+
+
+        // iterator test
+        /*ArrayList<String> l = new ArrayList<>();
+        l.add("hello1");
+        l.add("hello2");
+
+        Iterator<String> it = l.iterator();
+
+        while (it.hasNext()) {
+            System.out.println("hey");
+            System.out.println(it.next());
+            //it.remove();
+        }
+        System.out.println("done");
+        System.out.println(l);
+        System.out.println("\n".length() == 0);
+
+        ArrayList<Integer> l2 = new ArrayList<>();
+        for (int i : l2) {
+            System.out.println("problem");
+        }*/
+    }
+
     static void print_results(SimulationResult results) {
 
         // print the timeline
@@ -87,103 +207,63 @@ public class Simulation {
 
         System.out.println(sb.toString());
 
-    }
-    static void init(String file_path) {
-        try (BufferedReader br = new BufferedReader(new FileReader(file_path))) {
-            boolean found_n_cpus = false;
-            for (String line = br.readLine(); line != null; line = br.readLine()) {
-                line = line.trim();
-                if (line.isEmpty() || line.startsWith("//")) continue;
-                else if (!found_n_cpus){
-                    n_cpus = Integer.parseInt(line.split("[ \t$]+")[1]);
-                    found_n_cpus = true;
-                }
-                else {
-                    input_lines.add(line);
-                }
+        // General stats
+
+        sb = new StringBuilder();
+        DecimalFormat df = new DecimalFormat("#0.00");
+        sb.append("\n** General statistics **\n\n");
+
+        sb.append("CPU utilization:\n\n");
+
+        int total_time_units = results.cpu_timelines.get(0).size();
+        int total_idle_time = 0;
+
+        for (int i = 0; i < n_cpus; ++i) {
+            sb.append("CPU" + String.format("%03d", i) + ": ");
+            // count idle time units
+            int idle_units = 0;
+            var cpu_timeline = results.cpu_timelines.get(i);
+            for (String str : cpu_timeline) {
+                if (str.equals(Simulation.IDLE)) ++idle_units;
             }
+            sb.append("" + (total_time_units - idle_units) + "/" + total_time_units + "\n");
+            total_idle_time += idle_units;
         }
-        catch (IOException ioe) {
-            System.out.println("Couldn't open file: " + file_path);
-            ioe.printStackTrace();
-            System.exit(1);
+
+
+        sb.append("\nTOTAL CPU USAGE: " + (total_time_units * n_cpus - total_idle_time) + "/" + total_time_units * n_cpus);
+        sb.append(" (" +df.format(
+                100.0 *(total_time_units*n_cpus - total_idle_time)/(total_time_units*n_cpus)) + "%)");
+
+
+        sb.append("\n\nAverage wait time and wait time per process: \n");
+        int total_wait_time = 0;
+        for (SimProcess p : results.processes) {
+            sb.append(p.pid + ": " + p.time_waiting + "\n");
+            total_wait_time += p.time_waiting;
         }
-        catch (Exception e) {
-            System.out.println("Problem with input format");
-            e.printStackTrace();
-            System.exit(1);
+        sb.append("Average wait time: " + df.format((double)total_wait_time/results.processes.size()));
+
+        sb.append("\n\nTurnaround time for each process\n\n");
+        int total = 0;
+        for (SimProcess p : results.processes) {
+            sb.append(p.pid + ": " + p.turnaround + "\n");
+            total += p.turnaround;
         }
+        sb.append("Average turnaround: " + df.format((double)total/results.processes.size()));
+
+
+        // print CPU response time
+        sb.append("\n\nCPU response time for each process\n\n");
+        total = 0;
+        for (SimProcess p : results.processes) {
+            sb.append(p.pid + ": " + p.response_time + "\n");
+            total += p.response_time;
+        }
+        sb.append("Average response time: " + df.format((double)total/results.processes.size()));
+        System.out.println(sb.toString());
+
     }
-
-    static ArrayList<SimProcess> build_process_list() {
-        ArrayList<SimProcess> process_list = new ArrayList<>();
-        for (String entry_line : input_lines) {
-            String[] fields = entry_line.split("[ \t$]+");
-            LinkedList<Integer> io_requests = new LinkedList<>();
-            if (fields.length > 3) { // there are IO requests
-                for (int i = 3; i < fields.length; ++i) {
-                    io_requests.add(Integer.parseInt(fields[i]));
-                }
-            }
-
-            process_list.add(
-                    new SimProcess(
-                            fields[0],
-                            Integer.parseInt(fields[1]),
-                            Integer.parseInt((fields[2])),
-                            io_requests)
-            );
-
-        }
-
-        return process_list;
-    }
-
-    public static void main(String[] args) {
-        Scanner scan = new Scanner(System.in);
-        String file_path;
-        if (args.length == 1) file_path = args[0];
-        else {
-            while (true) {
-                System.out.println("Please provide a valid input file path: ");
-                file_path = scan.nextLine().trim();
-                if (new File(file_path).canRead()) break;
-            }
-        }
-
-        // read input
-        init(file_path);
-
-        //main loop creates a brand new list of processes for each algo
-        FCFS fcfs = new FCFS();
-        SimulationResult sim_result = fcfs.run_processes(build_process_list());
-        print_results(sim_result);
-
-
-
-        // iterator test
-        /*ArrayList<String> l = new ArrayList<>();
-        l.add("hello1");
-        l.add("hello2");
-
-        Iterator<String> it = l.iterator();
-
-        while (it.hasNext()) {
-            System.out.println("hey");
-            System.out.println(it.next());
-            //it.remove();
-        }
-        System.out.println("done");
-        System.out.println(l);
-        System.out.println("\n".length() == 0);
-
-        ArrayList<Integer> l2 = new ArrayList<>();
-        for (int i : l2) {
-            System.out.println("problem");
-        }*/
-    }
-
-
 
 
 }
