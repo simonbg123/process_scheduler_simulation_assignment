@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -24,6 +21,10 @@ public class Simulation {
                 if (line.isEmpty() || line.startsWith("//")) continue;
                 else if (!found_n_cpus){
                     n_cpus = Integer.parseInt(line.split("[ \t$]+")[1]);
+                    if (n_cpus < 1) {
+                        System.out.println("At least 1 CPU is needed. Value provided: " + n_cpus + ". Please modify the number of CPUs.\nExiting...");
+                        System.exit(1);
+                    }
                     found_n_cpus = true;
                 }
                 else {
@@ -79,9 +80,13 @@ public class Simulation {
                 if (new File(file_path).canRead()) break;
             }
         }
-        while(quantum == 0) {
+
+        // read input
+        init(file_path);
+
+        while(quantum < 1) {
             try {
-                System.out.println("Please provide quantum");
+                System.out.println("Please provide a quantum (>= 1)");
                 quantum = scan.nextInt();
             }
             catch (Exception e) {
@@ -91,52 +96,39 @@ public class Simulation {
         }
 
 
+        try (PrintWriter pw = new PrintWriter("simulation_output.txt")) {
 
-        // read input
-        init(file_path);
+            System.out.println("***** FCFS *****\n");
+            pw.println("**** FCFS ****\n");
+            SimulationResult sim_result = new FCFS().run_processes(build_process_list());
+            print_results(sim_result, pw);
 
-        //main loop creates a brand new list of processes for each algo
-        System.out.println("**** FCFS ****\n");
-        SimulationResult sim_result = new FCFS().run_processes(build_process_list());
-        print_results(sim_result);
+            System.out.println("\n\n***** SJF *****\n");
+            pw.println("\n\n**** SJF ****\n");
+            sim_result = new SJF().run_processes(build_process_list());
+            print_results(sim_result, pw);
 
-        System.out.println("\n\n**** SJF ****\n");
-        sim_result = new SJF().run_processes(build_process_list());
-        print_results(sim_result);
+            System.out.println("\n\n***** SRTF *****\n");
+            pw.println("\n\n***** SRTF *****\n");
+            sim_result = new SRTF().run_processes(build_process_list());
+            print_results(sim_result, pw);
 
-        System.out.println("\n\n**** SRTF ****\n");
-        sim_result = new SRTF().run_processes(build_process_list());
-        print_results(sim_result);
-
-        System.out.println("\n\n**** RR with quantum: " + quantum +" ****\n");
-        sim_result = new RR().run_processes(build_process_list());
-        print_results(sim_result);
-
-
-
-        // iterator test
-        /*ArrayList<String> l = new ArrayList<>();
-        l.add("hello1");
-        l.add("hello2");
-
-        Iterator<String> it = l.iterator();
-
-        while (it.hasNext()) {
-            System.out.println("hey");
-            System.out.println(it.next());
-            //it.remove();
+            System.out.println("\n\n***** RR with quantum: " + quantum +" *****\n");
+            pw.println("\n\n**** RR with quantum: " + quantum +" ****\n");
+            sim_result = new RR().run_processes(build_process_list());
+            print_results(sim_result, pw);
         }
-        System.out.println("done");
-        System.out.println(l);
-        System.out.println("\n".length() == 0);
+        catch (FileNotFoundException e) {
+            System.out.println("Problem writing to output file.");
+            e.printStackTrace();
+        }
 
-        ArrayList<Integer> l2 = new ArrayList<>();
-        for (int i : l2) {
-            System.out.println("problem");
-        }*/
+
+
+
     }
 
-    static void print_results(SimulationResult results) {
+    static void print_results(SimulationResult results, PrintWriter pw) {
 
         // print the timeline
         StringBuilder sb = new StringBuilder();
@@ -210,6 +202,7 @@ public class Simulation {
 
 
         System.out.println(sb.toString());
+        pw.println(sb.toString());
 
         // General stats
 
@@ -265,7 +258,9 @@ public class Simulation {
             total += p.response_time;
         }
         sb.append("Average response time: " + df.format((double)total/results.processes.size()));
+
         System.out.println(sb.toString());
+        pw.println(sb.toString());
 
     }
 

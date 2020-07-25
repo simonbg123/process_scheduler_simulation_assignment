@@ -4,6 +4,6 @@ public class SJF extends FCFS {
 
 
     public SJF() {
-        ready_queue = new PriorityQueue<>((SimProcess s1, SimProcess s2)->(s1.time_rem - s2.time_rem));
+        ready_queue = new PriorityQueue<>(Comparator.comparingInt(SimProcess::getTime_rem));
     }
 }
