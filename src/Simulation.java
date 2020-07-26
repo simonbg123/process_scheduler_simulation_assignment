@@ -65,6 +65,10 @@ public class Simulation {
 
         }
 
+        if (process_list.isEmpty()) {
+            System.out.println("No processes were specified. At least one process is needed.\nExiting...");
+            System.exit(1);
+        }
         return process_list;
     }
 
