@@ -44,7 +44,7 @@ public class Simulation {
         }
     }
 
-    static ArrayList<SimProcess> build_process_list() {
+    static ArrayList<SimProcess> build_process_list() throws Exception {
         ArrayList<SimProcess> process_list = new ArrayList<>();
         for (String entry_line : input_lines) {
             String[] fields = entry_line.split("[ \t$]+");
@@ -120,6 +120,10 @@ public class Simulation {
         }
         catch (FileNotFoundException e) {
             System.out.println("Problem writing to output file.");
+            e.printStackTrace();
+        }
+        catch (Exception e) {
+            System.out.println("Problem processing input. please check input format.");
             e.printStackTrace();
         }
 
