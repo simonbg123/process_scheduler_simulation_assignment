@@ -100,22 +100,22 @@ public class Simulation {
 
             System.out.println("***** FCFS *****\n");
             pw.println("**** FCFS ****\n");
-            SimulationResult sim_result = new FCFS().run_processes(build_process_list());
+            SimulationResult sim_result = new FCFS(build_process_list()).run_processes();
             print_results(sim_result, pw);
 
             System.out.println("\n\n***** SJF *****\n");
             pw.println("\n\n**** SJF ****\n");
-            sim_result = new SJF().run_processes(build_process_list());
+            sim_result = new SJF(build_process_list()).run_processes();
             print_results(sim_result, pw);
 
             System.out.println("\n\n***** SRTF *****\n");
             pw.println("\n\n***** SRTF *****\n");
-            sim_result = new SRTF().run_processes(build_process_list());
+            sim_result = new SRTF(build_process_list()).run_processes();
             print_results(sim_result, pw);
 
             System.out.println("\n\n***** RR with quantum: " + quantum +" *****\n");
             pw.println("\n\n**** RR with quantum: " + quantum +" ****\n");
-            sim_result = new RR().run_processes(build_process_list());
+            sim_result = new RR(build_process_list()).run_processes();
             print_results(sim_result, pw);
         }
         catch (FileNotFoundException e) {
