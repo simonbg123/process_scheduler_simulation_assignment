@@ -1,3 +1,10 @@
+/**
+ * Author: Simon Brillant-Giroux
+ * COMP-346
+ * Assignment 2
+ * July 26, 2020
+ */
+
 import java.util.LinkedList;
 
 /**
@@ -28,5 +35,9 @@ public class SimProcess {
 
     public int getTime_rem() {
         return time_rem;
+    }
+
+    public String getPid() {
+        return pid;
     }
 }

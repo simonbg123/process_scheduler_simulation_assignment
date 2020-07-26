@@ -1,3 +1,10 @@
+/**
+ * Author: Simon Brillant-Giroux
+ * COMP-346
+ * Assignment 2
+ * July 26, 2020
+ */
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Queue;
@@ -131,7 +138,7 @@ abstract class SchedulingAlgorithm {
         sim_result.IO_waitqueue_timeline = io_queue.waitqueue_timeline;
 
         // sort processes
-        Collections.sort(sim_result.processes, (SimProcess s1, SimProcess s2)->s1.pid.compareTo(s2.pid));
+        Collections.sort(sim_result.processes, (SimProcess s1, SimProcess s2)->Integer.parseInt(s1.pid.substring(1)) - (Integer.parseInt(s2.pid.substring(1))));
         return sim_result;
     }
 

@@ -1,3 +1,10 @@
+/**
+ * Author: Simon Brillant-Giroux
+ * COMP-346
+ * Assignment 2
+ * July 26, 2020
+ */
+
 import java.io.*;
 import java.lang.reflect.Array;
 import java.text.DecimalFormat;
@@ -100,10 +107,15 @@ public class Simulation {
         }
 
 
+
+
         try (PrintWriter pw = new PrintWriter("simulation_output.txt")) {
 
-            System.out.println("***** FCFS *****\n");
-            pw.println("**** FCFS ****\n");
+            System.out.println("Quantum value : " + quantum);
+            pw.println("Quantum value : " + quantum);
+
+            System.out.println("\n***** FCFS *****\n");
+            pw.println("\n**** FCFS ****\n");
             SimulationResult sim_result = new FCFS(build_process_list()).run_processes();
             print_results(sim_result, pw);
 
