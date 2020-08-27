@@ -1,0 +1,272 @@
+Quantum value : 4
+
+**** FCFS ****
+
+
+time              |000|001|002|003|004|005|006|007|008|009|010|011|012|013|014|015|016|017|018|019|020|021|022|023|024|025|026|027|028|029|030|031|032|033|034|035|036|
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CPU000             p0  p0  p1  p1  p1  ___ ___ ___ ___ p0  p0  p0  ___ p2  p4  p4  p0  p0  p6  p6  p6  p7  p7  p7  p7  p7  p7  p3  p3  p3  p3  p3  p8  p2  p2  p2  p2  
+CPU001             ___ ___ ___ ___ p0  p0  p0  ___ ___ ___ p2  p3  p3  p3  ___ p5  p5  p5  p5  p5  p5  p5  p8  p8  p8  p8  p2  p4  p4  p6  p6  p6  p6  p4  ___ ___ ___ 
+
+Ready-queue        ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ p0  p6  p6  p7  p7  p7  p8  p2  p2  p2  p2  p3  p6  p6  p8  p8  p8  p2  ___ ___ ___ ___ 
+                                                                                   p7  p7  p8  p8  p8  p2  p3  p3  p3  p3  p4      p8      p2  p2  p4                  
+                                                                                   p8  p8  p2  p2  p2  p3  p4  p4  p4  p4  p6                                          
+                                                                                       p2      p3  p3  p4      p6  p6  p6                                              
+                   
+IO processing      ___ ___ p0  p0  ___ ___ ___ p0  p0  ___ ___ p2  p2  p0  p0  p2  p2  p3  p3  p4  p4  p6  p6  ___ ___ ___ p8  p8  p2  p2  p4  p4  ___ ___ ___ ___ ___ 
+
+IO wait queue      ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ p0  ___ p2  p3  p3  p4  p4  ___ ___ ___ ___ ___ ___ ___ ___ p2  ___ p4  ___ ___ ___ ___ ___ ___ ___ 
+                                                                           p3      p4                                                                                  
+                   
+
+
+** General statistics **
+
+CPU utilization:
+
+CPU000: 32/37
+CPU001: 26/37
+
+TOTAL CPU USAGE: 58/74 (78.38%)
+
+Average wait time and wait time per process: 
+p0: 2
+p1: 0
+p2: 14
+p3: 11
+p4: 11
+p5: 0
+p6: 8
+p7: 5
+p8: 10
+Average wait time: 6.78
+
+Turnaround time for each process
+
+p0: 18
+p1: 3
+p2: 27
+p3: 21
+p4: 20
+p5: 7
+p6: 17
+p7: 11
+p8: 17
+Average turnaround: 15.67
+
+CPU response time for each process
+
+p0: 0
+p1: 0
+p2: 0
+p3: 0
+p4: 0
+p5: 0
+p6: 2
+p7: 5
+p8: 6
+Average response time: 1.44
+
+
+**** SJF ****
+
+
+time              |000|001|002|003|004|005|006|007|008|009|010|011|012|013|014|015|016|017|018|019|020|021|022|023|024|025|026|027|028|029|030|031|032|033|034|035|036|037|038|039|
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CPU000             p0  p0  p1  p1  p1  ___ ___ ___ ___ p0  p0  p0  ___ p2  p4  p4  p8  p8  p8  p8  p3  p3  p3  p3  p3  p8  p2  p2  p2  p2  p4  p6  p6  p6  ___ ___ p6  p6  p6  p6  
+CPU001             ___ ___ ___ ___ p0  p0  p0  ___ ___ ___ p2  p3  p3  p3  ___ p0  p0  p2  p7  p7  p7  p7  p7  p7  p4  p4  p5  p5  p5  p5  p5  p5  p5  ___ ___ ___ ___ ___ ___ ___ 
+
+Ready-queue        ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ p5  p7  p7  p5  p3  p5  p4  p4  p4  p2  p2  p6  p6  p4  p4  p6  ___ ___ ___ ___ ___ ___ ___ ___ ___ 
+                                                                                   p6  p6  p6  p6  p6  p6  p6  p2  p6  p6          p6  p6                                          
+                                                                                   p5  p5      p5      p5  p5  p5  p5  p5                                                          
+                                                                                                               p6                                                                  
+                   
+IO processing      ___ ___ p0  p0  ___ ___ ___ p0  p0  ___ ___ p2  p2  p0  p0  p2  p2  p3  p3  p4  p4  p2  p2  p8  p8  ___ p4  p4  ___ ___ ___ ___ ___ ___ p6  p6  ___ ___ ___ ___ 
+
+IO wait queue      ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ p0  ___ p2  p3  p3  p4  p4  p2  p2  p8  p8  ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ 
+                                                                           p3      p4      p2      p8                                                                              
+                   
+
+
+** General statistics **
+
+CPU utilization:
+
+CPU000: 33/40
+CPU001: 25/40
+
+TOTAL CPU USAGE: 58/80 (72.50%)
+
+Average wait time and wait time per process: 
+p0: 1
+p1: 0
+p2: 7
+p3: 4
+p4: 8
+p5: 11
+p6: 15
+p7: 2
+p8: 3
+Average wait time: 5.67
+
+Turnaround time for each process
+
+p0: 17
+p1: 3
+p2: 20
+p3: 14
+p4: 17
+p5: 18
+p6: 24
+p7: 8
+p8: 10
+Average turnaround: 14.56
+
+CPU response time for each process
+
+p0: 0
+p1: 0
+p2: 0
+p3: 0
+p4: 0
+p5: 11
+p6: 15
+p7: 2
+p8: 0
+Average response time: 3.11
+
+
+***** SRTF *****
+
+
+time              |000|001|002|003|004|005|006|007|008|009|010|011|012|013|014|015|016|017|018|019|020|021|022|023|024|025|026|027|028|029|030|031|032|033|034|035|036|037|
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CPU000             p0  p0  p1  p1  p1  ___ ___ ___ ___ p0  p0  p0  ___ p2  p4  p0  p0  p2  p7  p7  p7  p7  p7  p7  p2  p8  p2  p4  p5  p5  p5  p5  p5  p5  p5  ___ ___ ___ 
+CPU001             ___ ___ ___ ___ p0  p0  p0  ___ ___ ___ p2  p3  p3  p3  ___ p4  p8  p8  p8  p8  p3  p4  p4  p3  p3  p3  p3  p2  p2  p6  p6  p6  ___ ___ p6  p6  p6  p6  
+
+Ready-queue        ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ p5  p7  p7  p5  p3  p5  p3  p3  p2  p5  p2  p5  p5  p6  ___ ___ ___ ___ ___ ___ ___ ___ ___ 
+                                                                                   p6  p6  p6  p6  p6  p6  p6  p6  p6  p6  p6  p6                                          
+                                                                                   p5  p5      p5      p5  p5  p5      p5                                                  
+                   
+IO processing      ___ ___ p0  p0  ___ ___ ___ p0  p0  ___ ___ p2  p2  p0  p0  p2  p2  p3  p3  p4  p4  p2  p2  p8  p8  p4  p4  ___ ___ ___ ___ ___ p6  p6  ___ ___ ___ ___ 
+
+IO wait queue      ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ p0  ___ p2  p3  p3  p4  p4  p2  p2  p8  p8  p4  p4  ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ 
+                                                                           p3      p4      p2      p8                                                                      
+                   
+
+
+** General statistics **
+
+CPU utilization:
+
+CPU000: 30/38
+CPU001: 28/38
+
+TOTAL CPU USAGE: 58/76 (76.32%)
+
+Average wait time and wait time per process: 
+p0: 1
+p1: 0
+p2: 6
+p3: 6
+p4: 5
+p5: 13
+p6: 13
+p7: 2
+p8: 3
+Average wait time: 5.44
+
+Turnaround time for each process
+
+p0: 17
+p1: 3
+p2: 19
+p3: 16
+p4: 14
+p5: 20
+p6: 22
+p7: 8
+p8: 10
+Average turnaround: 14.33
+
+CPU response time for each process
+
+p0: 0
+p1: 0
+p2: 0
+p3: 0
+p4: 0
+p5: 13
+p6: 13
+p7: 2
+p8: 0
+Average response time: 3.11
+
+
+**** RR with quantum: 4 ****
+
+
+time              |000|001|002|003|004|005|006|007|008|009|010|011|012|013|014|015|016|017|018|019|020|021|022|023|024|025|026|027|028|029|030|031|032|033|034|035|
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CPU000             p0  p0  p1  p1  p1  ___ ___ ___ ___ p0  p0  p0  ___ p2  p4  p4  p0  p0  p6  p6  p6  p8  p8  p8  p8  p5  p5  p5  p4  p4  p7  p7  p2  p2  p2  p2  
+CPU001             ___ ___ ___ ___ p0  p0  p0  ___ ___ ___ p2  p3  p3  p3  ___ p5  p5  p5  p5  p7  p7  p7  p7  p2  p3  p3  p3  p3  p6  p6  p6  p6  p8  p3  p4  ___ 
+
+Ready-queue        ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ p0  p6  p6  p7  p8  p8  p2  p2  p3  p5  p4  p4  p4  p7  p7  p2  p2  p3  p4  ___ ___ 
+                                                                                   p7  p7  p8  p2  p2  p3  p3  p5  p4  p6  p6  p6  p2  p2  p8  p8  p4              
+                                                                                   p8  p8  p2  p3  p3  p5  p5  p4  p6  p7  p7  p7  p8  p8  p3  p3                  
+                                                                                       p2      p5  p5  p4  p4  p6  p7      p2  p2  p3  p3                          
+                                                                                                               p7                                                  
+                   
+IO processing      ___ ___ p0  p0  ___ ___ ___ p0  p0  ___ ___ p2  p2  p0  p0  p2  p2  p3  p3  p4  p4  p6  p6  ___ p2  p2  p8  p8  ___ ___ p4  p4  ___ ___ ___ ___ 
+
+IO wait queue      ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ p0  ___ p2  p3  p3  p4  p4  ___ ___ ___ ___ ___ ___ p8  ___ ___ ___ ___ ___ ___ ___ ___ ___ ___ 
+                                                                           p3      p4                                                                              
+                   
+
+
+** General statistics **
+
+CPU utilization:
+
+CPU000: 31/36
+CPU001: 27/36
+
+TOTAL CPU USAGE: 58/72 (80.56%)
+
+Average wait time and wait time per process: 
+p0: 2
+p1: 0
+p2: 13
+p3: 13
+p4: 12
+p5: 6
+p6: 7
+p7: 10
+p8: 10
+Average wait time: 8.11
+
+Turnaround time for each process
+
+p0: 18
+p1: 3
+p2: 26
+p3: 23
+p4: 21
+p5: 13
+p6: 16
+p7: 16
+p8: 17
+Average turnaround: 17.00
+
+CPU response time for each process
+
+p0: 0
+p1: 0
+p2: 0
+p3: 0
+p4: 0
+p5: 0
+p6: 2
+p7: 3
+p8: 5
+Average response time: 1.11

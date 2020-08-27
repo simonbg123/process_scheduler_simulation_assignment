@@ -1,0 +1,21 @@
+numOfCPUs:	3
+
+// list of processes to be scheduled
+// processID		arrivalTime		totalExecTime		IO_RequestAtTime 	IO_RequestAtTime		IO_RequestAtTime		...
+p0	0	10	2	5	8
+p1	2	3
+p2	6	7	1	2	3
+p3      8      8       3
+p4      9      5       2       4
+p5      9      7
+p6      11      7       3
+p7      12      6
+p8      13      5       4
+p9      14      8 
+p10     14      1
+p11     15      10      2       4         6
+p12     18      5       4
+p13     19      7       3
+p14     21      8       2
+   
+    

@@ -9,49 +9,49 @@ import java.util.*;
 
 public class RR extends SchedulingAlgorithm {
 
-    public RR(ArrayList<SimProcess> process_list) {
+    public RR(int n_cpus, ArrayList<SimProcess> process_list) {
 
-        super(process_list);
-        ready_queue = new LinkedList<>();
+        super(n_cpus, process_list);
+        readyQueue = new LinkedList<>();
 
     }
 
     // Poll all CPUs, check availability, then status of current process
     // check if process finished or needs IO
     // check if time slices have expired
-    protected void poll_cpus() {
+    protected void pollCPUs() {
 
-        for (CPU cpu : cpu_list) {
+        for (CPU cpu : cpuList) {
             // check if CPU is currently free at the beginning of this cycle
             SimProcess p = cpu.currentProcess;
             if (p == null) {
                 give_process_to_cpu(cpu);
             }
-            else if (p.time_rem == 0){
-                p.turnaround = time - p.arrival_time; // will be removed from active list when next polled
-                sim_result.processes.add(p);
-                process_list.remove(p);
+            else if (p.timeRem == 0){
+                p.turnaround = time - p.arrivalTime; // will be removed from active list when next polled
+                simResult.processes.add(p);
+                processList.remove(p);
                 // check if the ending process was the last one remaining
-                if (process_list.isEmpty()) {
+                if (processList.isEmpty()) {
                     break;
                 }
                 // try to replace the process with one from the ready-queue
                 cpu.currentProcess = null;
                 give_process_to_cpu(cpu);
             }
-            else if (!p.IOrequests.isEmpty() && p.exec_time - p.time_rem == p.IOrequests.peek()) { // requests OI
+            else if (!p.IOrequests.isEmpty() && p.execTime - p.timeRem == p.IOrequests.peek()) { // requests OI
                 p.IOrequests.removeFirst();
-                io_queue.wait_queue.add(p); // may still be moved to io processing during this cycle
+                ioQueue.waitQueue.add(p); // may still be moved to io processing during this cycle
                 cpu.currentProcess = null;
                 give_process_to_cpu(cpu);
             }
             else { // active process, check if can be bumped
-                if (cpu.current_timeslice == Simulation.quantum) {
+                if (cpu.currentTimeslice == Main.quantum) {
                     cpu.currentProcess = null;
-                    ready_queue.add(p); // if p is alone in the queue, it may come back for another slice
+                    readyQueue.add(p); // if p is alone in the queue, it may come back for another slice
                     give_process_to_cpu(cpu);
                 }
-                else ++cpu.current_timeslice;
+                else ++cpu.currentTimeslice;
 
             }
 
@@ -60,18 +60,18 @@ public class RR extends SchedulingAlgorithm {
     }
 
     private void give_process_to_cpu(CPU cpu) {
-        SimProcess p = ready_queue.poll();
+        SimProcess p = readyQueue.poll();
 
         if (p != null) {
             cpu.currentProcess = p;
-            if (p.response_time < 0) { // first time in a CPU
-                p.response_time = time - p.arrival_time;
+            if (p.responseTime < 0) { // first time in a CPU
+                p.responseTime = time - p.arrivalTime;
             }
-            cpu.current_timeslice = 1;
+            cpu.currentTimeslice = 1;
         }
         else {
             cpu.currentProcess = null;
-            cpu.current_timeslice = 0;
+            cpu.currentTimeslice = 0;
         }
 
     }

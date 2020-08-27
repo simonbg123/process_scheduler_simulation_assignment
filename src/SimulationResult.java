@@ -7,19 +7,22 @@
 
 import java.util.ArrayList;
 
+/**
+ * Contains the data structures needed to output the result of a simulation
+ */
 public class SimulationResult {
 
-    ArrayList<ArrayList<String>> cpu_timelines;
-    ArrayList<ArrayList<String>> readyqueue_timeline;
-    ArrayList<String> IO_timeline;
-    ArrayList<ArrayList<String>> IO_waitqueue_timeline;
+    ArrayList<ArrayList<String>> cpuTimelines;
+    ArrayList<ArrayList<String>> readyqueueTimeline;
+    ArrayList<String> ioTimeline;
+    ArrayList<ArrayList<String>> ioWaitqueueTimeline;
     ArrayList<SimProcess> processes;
 
     public SimulationResult() {
-        cpu_timelines = new ArrayList<>();
-        readyqueue_timeline = new ArrayList<>();
-        IO_timeline = new ArrayList<>();
-        IO_waitqueue_timeline = new ArrayList<>();
+        cpuTimelines = new ArrayList<>();
+        readyqueueTimeline = new ArrayList<>();
+        ioTimeline = new ArrayList<>();
+        ioWaitqueueTimeline = new ArrayList<>();
         processes = new ArrayList<>();
     }
 }

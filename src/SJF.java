@@ -10,8 +10,8 @@ import java.util.*;
 public class SJF extends FCFS {
 
 
-    public SJF(ArrayList<SimProcess> process_list) {
-        super(process_list);
-        ready_queue = new PriorityQueue<>(Comparator.comparingInt(SimProcess::getTime_rem));
+    public SJF(int n_cpus, ArrayList<SimProcess> process_list) {
+        super(n_cpus, process_list);
+        readyQueue = new PriorityQueue<>(Comparator.comparingInt(SimProcess::getTimeRem));
     }
 }
