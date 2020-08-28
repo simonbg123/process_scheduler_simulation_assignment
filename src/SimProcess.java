@@ -32,8 +32,4 @@ public class SimProcess {
         turnaround = 0;
         responseTime = -1;
     }
-
-    public int getTimeRem() {
-        return timeRem;
-    }
 }

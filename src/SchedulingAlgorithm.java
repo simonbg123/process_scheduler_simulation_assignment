@@ -6,7 +6,7 @@
  */
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.Queue;
 
 public abstract class SchedulingAlgorithm {
@@ -138,7 +138,8 @@ public abstract class SchedulingAlgorithm {
         simResult.ioWaitqueueTimeline = ioQueue.waitqueueTimeline;
 
         // sort processes
-        Collections.sort(simResult.processes, (SimProcess s1, SimProcess s2)->Integer.parseInt(s1.pid.substring(1)) - (Integer.parseInt(s2.pid.substring(1))));
+        simResult.processes.sort(Comparator.comparingInt(p -> Integer.parseInt(p.pid.substring(1))));
+
         return simResult;
     }
 
