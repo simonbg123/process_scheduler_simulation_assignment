@@ -21,4 +21,3 @@ NOTES:
 
 See the UML graph for insight into the design.
 
-Although the program uses many features of OOP, the programming style tilts more towards a procedural style. Usual OO principles such as encapsulation were not rigourously followed and classes are used more as C structs.

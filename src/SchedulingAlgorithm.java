@@ -7,17 +7,20 @@
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Queue;
 
 public abstract class SchedulingAlgorithm {
 
-    ArrayList<SimProcess> processList;
-    Queue<SimProcess> readyQueue;
-    ArrayList<ArrayList<String>> readyQueueTimeline;
-    IOqueue ioQueue;
-    SimulationResult simResult;
-    CPU[] cpuList;
-    int time;
+    public static final String IDLE = "___";
+
+    protected List<SimProcess> processList;
+    protected Queue<SimProcess> readyQueue;
+    protected List<List<String>> readyQueueTimeline;
+    protected IOqueue ioQueue;
+    protected SimulationResult simResult;
+    protected CPU[] cpuList;
+    protected int time;
 
     /**
      * Note: the ready-queue construction is left to the extending class
@@ -50,17 +53,17 @@ public abstract class SchedulingAlgorithm {
 
             // Poll all processes and queue those that arrive
             for (SimProcess p : processList) {
-                if (p.arrivalTime == time) {
+                if (p.getArrivalTime() == time) {
                     readyQueue.add(p);
                 }
 
             }
             // Check IO queue for finished IO and place process in ready-queue
-            if (ioQueue.currentlyProcessing != null) {
-                ioQueue.timeRemaining -= 1;
-                if (ioQueue.timeRemaining < 0) {
-                    readyQueue.add(ioQueue.currentlyProcessing);
-                    ioQueue.currentlyProcessing = null;
+            if (ioQueue.getCurrentlyProcessing() != null) {
+                ioQueue.decrementTimeRemaining();
+                if (ioQueue.getTimeRemaining() < 0) {
+                    readyQueue.add(ioQueue.getCurrentlyProcessing());
+                    ioQueue.setCurrentlyProcessing(null);
                 }
             }
 
@@ -74,49 +77,49 @@ public abstract class SchedulingAlgorithm {
 
             // check IO wait queue, move process for IO processing
             // ++timewaiting for all remaining in queue
-            if (ioQueue.currentlyProcessing == null) {
-                SimProcess p = ioQueue.waitQueue.poll();
+            if (ioQueue.getCurrentlyProcessing() == null) {
+                SimProcess p = ioQueue.pollWaitQueue();
                 if (p != null) {
-                    ioQueue.currentlyProcessing = p;
-                    ioQueue.timeRemaining = 1;
+                    ioQueue.setCurrentlyProcessing(p);
+                    ioQueue.setTimeRemaining(1);
                 }
             } // note: no else: we already checked earlier if a process had finished its IO
 
             // increment waiting time for all processes in the IO waiting queue
             // if they're in the wait queu at this point, we know they will spend the next
             // cycle there
-            for (SimProcess p : ioQueue.waitQueue) {
-                ++p.timeWaiting;
+            for (SimProcess p : ioQueue.getWaitQueue()) {
+                p.incrementTimeWaiting();
             }
 
             // update IO timeline and IO wait-queue timeline
-            ioQueue.update_io_timelines();
+            ioQueue.updateIoTimelines();
 
 
             // increment waiting time for all processes int the ready-queue
             // same reasoning as for the IO wait queue
             for (SimProcess p : readyQueue) {
-                ++p.timeWaiting;
+                p.incrementTimeWaiting();
             }
 
             // update ready-queue timeline
             ArrayList<String> current_state = new ArrayList<>();
             for (SimProcess p : readyQueue) {
-                current_state.add(p.pid);
+                current_state.add(p.getPid());
             }
-            if (current_state.isEmpty()) current_state.add(Main.IDLE);
+            if (current_state.isEmpty()) current_state.add(IDLE);
             readyQueueTimeline.add(current_state);
 
             // update time remaining for processes on CPUs
             // as well as timeline
             for (CPU cpu : cpuList) {
-                SimProcess p = cpu.currentProcess;
+                SimProcess p = cpu.getCurrentProcess();
                 if (p != null) {
-                    --cpu.currentProcess.timeRem;
-                    cpu.timeline.add(p.pid);
+                    p.decrementTimeRem();
+                    cpu.addToTimeline(p.getPid());
                 }
                 else {
-                    cpu.timeline.add(Main.IDLE);
+                    cpu.addToTimeline(IDLE);
                 }
 
             }
@@ -128,17 +131,17 @@ public abstract class SchedulingAlgorithm {
 
         // get the cpu timelines
         for (CPU cpu : cpuList) {
-            simResult.cpuTimelines.add(cpu.timeline);
+            simResult.addCPUtimeline(cpu.getTimeline());
         }
         // add the ready-queue timeline
-        simResult.readyqueueTimeline = readyQueueTimeline;
+        simResult.setReadyqueueTimeline(readyQueueTimeline);
         // add IO timeline
-        simResult.ioTimeline = ioQueue.timeline;
+        simResult.setIOtimeline(ioQueue.getTimeline());
         // add IO wait queue timeline
-        simResult.ioWaitqueueTimeline = ioQueue.waitqueueTimeline;
+        simResult.setIOwaitqueueTimeline(ioQueue.getWaitqueueTimeline());
 
         // sort processes
-        simResult.processes.sort(Comparator.comparingInt(p -> Integer.parseInt(p.pid.substring(1))));
+        simResult.getProcesses().sort(Comparator.comparingInt(p -> Integer.parseInt(p.getPid().substring(1))));
 
         return simResult;
     }

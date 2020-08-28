@@ -13,8 +13,9 @@ public class SRTF extends SchedulingAlgorithm {
     public SRTF(int n_cpus, ArrayList<SimProcess> process_list) {
 
         super(n_cpus, process_list);
-        readyQueue = new PriorityQueue<>(Comparator.comparingInt(p -> p.timeRem));
-        // if we had a getTimeRem() in SimProcess, then we could use: Comparator.comparingInt(SimProcess::getTimeRem)
+        readyQueue = new PriorityQueue<>(Comparator.comparingInt(SimProcess::getTimeRem)); // :: = key extractor
+        // if we didn't have a getTimeRem() in SimProcess and fields were accessible,
+        // then we could use: Comparator.comparingInt(p -> p.timeRem)
 
     }
 
@@ -24,38 +25,38 @@ public class SRTF extends SchedulingAlgorithm {
     protected void pollCPUs() {
         for (CPU cpu : cpuList) {
             // check if CPU is currently free at the beginning of this cycle
-            SimProcess p = cpu.currentProcess;
+            SimProcess p = cpu.getCurrentProcess();
             if (p == null) {
                 give_process_to_cpu(cpu);
             }
-            else if (p.timeRem == 0){
-                p.turnaround = time - p.arrivalTime; // will be removed from active list when next polled
-                simResult.processes.add(p);
+            else if (p.getTimeRem() == 0){
+                p.setTurnaround(time - p.getArrivalTime()); // will be removed from active list when next polled
+                simResult.addProcess(p);
                 processList.remove(p);
                 // check if the ending process was the last one remaining
                 if (processList.isEmpty()) {
                     break;
                 }
                 // try to replace the process with one from the ready-queue
-                cpu.currentProcess = null;
+                cpu.setCurrentProcess(null);
                 give_process_to_cpu(cpu);
             }
-            else if (!p.IOrequests.isEmpty() && p.execTime - p.timeRem == p.IOrequests.peek()) { // requests OI
-                p.IOrequests.removeFirst();
-                ioQueue.waitQueue.add(p); // may still be moved to io processing during this cycle
-                cpu.currentProcess = null;
+            else if (p.hasIOrequests() && p.getExecTime() - p.getTimeRem() == p.peekNextIOrequest()) { // requests OI
+                p.removeFirstIOrequest();
+                ioQueue.addToWaitQueue(p); // may still be moved to io processing during this cycle
+                cpu.setCurrentProcess(null);
                 give_process_to_cpu(cpu);
             }
             else { // active process, check if can be bumped
-                int time_rem = p.timeRem;
+                int time_rem = p.getTimeRem();
 
                 var ite = readyQueue.iterator();
 
                 while (ite != null && ite.hasNext()) {
                     var pr = ite.next();
-                    if (pr.timeRem >= time_rem) break; // the queue doesn't have shorter remaining times
+                    if (pr.getTimeRem() >= time_rem) break; // the queue doesn't have shorter remaining times
                     else { // there is a shorter remaining time, need to bump
-                        cpu.currentProcess = pr;
+                        cpu.setCurrentProcess(pr);
                         ite.remove();
                         ite = null;
                         readyQueue.add(p); // p goes back to the queue
@@ -72,12 +73,12 @@ public class SRTF extends SchedulingAlgorithm {
         SimProcess p = readyQueue.poll();
 
         if (p != null) {
-            cpu.currentProcess = p;
-            if (p.responseTime < 0) { // first time in a CPU
-                p.responseTime = time - p.arrivalTime;
+            cpu.setCurrentProcess(p);
+            if (p.getResponseTime() < 0) { // first time in a CPU
+                p.setResponseTime(time - p.getArrivalTime());
             }
         }
-        else cpu.currentProcess = null;
+        else cpu.setCurrentProcess(null);
 
     }
 }

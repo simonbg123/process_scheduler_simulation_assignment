@@ -9,11 +9,11 @@ import java.io.*;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
 
-    static final String IDLE = "___";
     static int nCPUs;
     static int quantum;
     static ArrayList<String> inputLines = new ArrayList<>();
@@ -101,16 +101,16 @@ public class Main {
         // print the timeline
         StringBuilder sb = new StringBuilder();
         sb.append("\ntime              |");
-        int n_time_units = results.cpuTimelines.get(0).size();
+        int n_time_units = results.getCPUtimeline(0).size();
         for (int i = 0; i < n_time_units; ++i) {
             sb.append(String.format("%03d", i) + "|");
         }
         sb.append("\n");
         for (int i = 0; i < (19 + n_time_units*4); ++i) sb.append("-");
         sb.append('\n');
-        for (int i = 0; i < results.cpuTimelines.size(); ++i) {
+        for (int i = 0; i < results.getNumberOfCPUs(); ++i) {
             sb.append("CPU" + String.format("%03d", i) + "             ");
-            var cpu_timeline = results.cpuTimelines.get(i);
+            var cpu_timeline = results.getCPUtimeline(i);
             for (String str : cpu_timeline) {
                 sb.append(str + (str.length() == 2? "  ": " "));
             }
@@ -120,7 +120,7 @@ public class Main {
 
         // check the max length of all ready-queue states
         int max_length = 0;
-        for (ArrayList<String> queue : results.readyqueueTimeline) {
+        for (List<String> queue : results.getReadyqueueTimeline()) {
             if (queue.size() > max_length) {
                 max_length = queue.size();
             }
@@ -128,7 +128,7 @@ public class Main {
         // print the ready-queue, level by level
         sb.append("Ready-queue        ");
         for (int i = 0; i < max_length; ++i) {
-            for (var queue_state : results.readyqueueTimeline) {
+            for (var queue_state : results.getReadyqueueTimeline()) {
                 if (queue_state.size() > i) {
                     String s = queue_state.get(i);
                     sb.append(s + (s.length() == 2? "  ": " "));
@@ -141,14 +141,14 @@ public class Main {
 
         //print the IO processing queue
         sb.append("IO processing      ");
-        for (String s : results.ioTimeline) {
+        for (String s : results.getIOtimeline()) {
             sb.append(s + (s.length() == 2? "  ": " "));
         }
         sb.append("\n\n");
 
         // check the max length of all IO wait-queue states
         max_length = 0;
-        for (ArrayList<String> queue : results.ioWaitqueueTimeline) {
+        for (List<String> queue : results.getIOwaitqueueTimeline()) {
             if (queue.size() > max_length) {
                 max_length = queue.size();
             }
@@ -157,7 +157,7 @@ public class Main {
 
         sb.append("IO wait queue      ");
         for (int i = 0; i < max_length; ++i) {
-            for (var queue_state : results.ioWaitqueueTimeline) {
+            for (var queue_state : results.getIOwaitqueueTimeline()) {
                 if (queue_state.size() > i) {
                     String s = queue_state.get(i);
                     sb.append(s + (s.length() == 2? "  ": " "));
@@ -180,16 +180,16 @@ public class Main {
 
         sb.append("CPU utilization:\n\n");
 
-        int total_time_units = results.cpuTimelines.get(0).size();
+        int total_time_units = results.getCPUtimeline(0).size();
         int total_idle_time = 0;
 
         for (int i = 0; i < nCPUs; ++i) {
             sb.append("CPU" + String.format("%03d", i) + ": ");
             // count idle time units
             int idle_units = 0;
-            var cpu_timeline = results.cpuTimelines.get(i);
+            var cpu_timeline = results.getCPUtimeline(i);
             for (String str : cpu_timeline) {
-                if (str.equals(Main.IDLE)) ++idle_units;
+                if (str.equals(SchedulingAlgorithm.IDLE)) ++idle_units;
             }
             sb.append("" + (total_time_units - idle_units) + "/" + total_time_units + "\n");
             total_idle_time += idle_units;
@@ -203,29 +203,30 @@ public class Main {
 
         sb.append("\n\nAverage wait time and wait time per process: \n");
         int total_wait_time = 0;
-        for (SimProcess p : results.processes) {
-            sb.append(p.pid + ": " + p.timeWaiting + "\n");
-            total_wait_time += p.timeWaiting;
+        var processList = results.getProcesses();
+        for (SimProcess p : processList) {
+            sb.append(p.getPid() + ": " + p.getTimeWaiting() + "\n");
+            total_wait_time += p.getTimeWaiting();
         }
-        sb.append("Average wait time: " + df.format((double)total_wait_time/results.processes.size()));
+        sb.append("Average wait time: " + df.format((double)total_wait_time/processList.size()));
 
         sb.append("\n\nTurnaround time for each process\n\n");
         int total = 0;
-        for (SimProcess p : results.processes) {
-            sb.append(p.pid + ": " + p.turnaround + "\n");
-            total += p.turnaround;
+        for (SimProcess p : processList) {
+            sb.append(p.getPid() + ": " + p.getTurnaround() + "\n");
+            total += p.getTurnaround();
         }
-        sb.append("Average turnaround: " + df.format((double)total/results.processes.size()));
+        sb.append("Average turnaround: " + df.format((double)total/processList.size()));
 
 
         // print CPU response time
         sb.append("\n\nCPU response time for each process\n\n");
         total = 0;
-        for (SimProcess p : results.processes) {
-            sb.append(p.pid + ": " + p.responseTime + "\n");
-            total += p.responseTime;
+        for (SimProcess p : processList) {
+            sb.append(p.getPid() + ": " + p.getResponseTime() + "\n");
+            total += p.getResponseTime();
         }
-        sb.append("Average response time: " + df.format((double)total/results.processes.size()));
+        sb.append("Average response time: " + df.format((double)total/processList.size()));
 
         System.out.println(sb.toString());
         pw.println(sb.toString());

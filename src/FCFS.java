@@ -19,26 +19,26 @@ public class FCFS extends SchedulingAlgorithm {
     protected void pollCPUs() {
         for (CPU cpu : cpuList) {
             // check if CPU is currently free at the beginning of this cycle
-            SimProcess p = cpu.currentProcess;
+            SimProcess p = cpu.getCurrentProcess();
             if (p == null) {
                 give_process_to_cpu(cpu);
             }
-            else if (p.timeRem == 0){
-                p.turnaround = time - p.arrivalTime; // will be removed from active list when next polled
-                simResult.processes.add(p);
+            else if (p.getTimeRem() == 0){
+                p.setTurnaround(time - p.getArrivalTime()); // will be removed from active list when next polled
+                simResult.addProcess(p);
                 processList.remove(p);
                 // check if the ending process was the last one remaining
                 if (processList.isEmpty()) {
                     break;
                 }
                 // try to replace the process with one from the ready-queue
-                cpu.currentProcess = null;
+                cpu.setCurrentProcess(null);
                 give_process_to_cpu(cpu);
             }
-            else if (!p.IOrequests.isEmpty() && p.execTime - p.timeRem == p.IOrequests.peek()) { // requests OI
-                p.IOrequests.removeFirst();
-                ioQueue.waitQueue.add(p); // may still be moved to io processing during this cycle
-                cpu.currentProcess = null;
+            else if (p.hasIOrequests() && p.getExecTime() - p.getTimeRem() == p.peekNextIOrequest()) { // requests OI
+                p.removeFirstIOrequest();
+                ioQueue.addToWaitQueue(p); // may still be moved to io processing during this cycle
+                cpu.setCurrentProcess(null);
                 give_process_to_cpu(cpu);
             }
             // else, it is an active process. Will update at end of this iteration
@@ -49,12 +49,12 @@ public class FCFS extends SchedulingAlgorithm {
         SimProcess p = readyQueue.poll();
 
         if (p != null) {
-            cpu.currentProcess = p;
-            if (p.responseTime < 0) { // first time in a CPU
-                p.responseTime = time - p.arrivalTime;
+            cpu.setCurrentProcess(p);
+            if (p.getResponseTime() < 0) { // first time in a CPU
+                p.setResponseTime(time - p.getArrivalTime());
             }
         }
-        else cpu.currentProcess = null;
+        else cpu.setCurrentProcess(null);
 
     }
 }
