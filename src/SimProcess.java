@@ -12,14 +12,14 @@ import java.util.LinkedList;
  */
 public class SimProcess {
 
-    String pid;
-    int arrivalTime;
-    int execTime;  // total cpu time required by the process
-    LinkedList<Integer> IOrequests;  // times of IO requests to be made by the process, in relation to the execTime
-    int timeRem;  // current remaining CPU time required by the process
-    int timeWaiting;
-    int turnaround;
-    int responseTime;
+    private String pid;
+    private int arrivalTime;
+    private int execTime;  // total cpu time required by the process
+    private LinkedList<Integer> IOrequests;  // times of IO requests to be made by the process, in relation to the execTime
+    private int timeRem;  // current remaining CPU time required by the process
+    private int timeWaiting;
+    private int turnaround;
+    private int responseTime;
 
 
     public SimProcess(String pid, int arrival_time, int exec_time, LinkedList<Integer> IOrequests) {
@@ -32,4 +32,62 @@ public class SimProcess {
         turnaround = 0;
         responseTime = -1;
     }
+
+    public String getPid() {
+        return pid;
+    }
+
+    public int getArrivalTime() {
+        return arrivalTime;
+    }
+
+    public int getExecTime() {
+        return execTime;
+    }
+
+    public boolean hasIOrequests() {
+        return !IOrequests.isEmpty();
+    }
+
+    public int peekNextIOrequest() {
+        return IOrequests.peek();
+    }
+
+    public void removeFirstIOrequest() {
+        IOrequests.removeFirst();
+    }
+
+    public int getTimeRem() {
+        return timeRem;
+    }
+
+    public void decrementTimeRem() {
+        --timeRem;
+    }
+
+    public int getTimeWaiting() {
+        return timeWaiting;
+    }
+
+    public void incrementTimeWaiting() {
+        ++timeWaiting;
+    }
+
+    public int getTurnaround() {
+        return turnaround;
+    }
+
+    public void setTurnaround(int turnaround) {
+        this.turnaround = turnaround;
+    }
+
+    public int getResponseTime() {
+        return responseTime;
+    }
+
+    public void setResponseTime(int responseTime) {
+        this.responseTime = responseTime;
+    }
+
+
 }
